@@ -14,9 +14,11 @@
 
 // 
 // To Do:
-// - display
-// - button interface to configure
+// - add button labels to bottom: UP DN EN
+// - cycle Pi recording based on duty cycle settings
 // - sleep ATSAM
+// - calculate power consumption
+// - save settings to EEPROM
 
 #include <Wire.h>
 #include <RTCZero.h>

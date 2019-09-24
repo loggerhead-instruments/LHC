@@ -15,13 +15,11 @@ boolean settingsChanged = 0;
 #define setHour 6
 #define setMinute 7
 #define setSecond 8
-#define setFsamp 9
-#define setBatPack 10
-#define setMode 11
-#define setStartHour 12
-#define setStartMinute 13
-#define setEndHour 14
-#define setEndMinute 15
+#define setMode 9
+#define setStartHour 10
+#define setStartMinute 11
+#define setEndHour 12
+#define setEndMinute 13
 
 time_t autoStartTime;
  
@@ -76,7 +74,7 @@ void manualSettings(){
       while(digitalRead(enterButton)==0){ // wait until let go of button
         delay(10);
       }
-      if((recMode==MODE_NORMAL & curSetting>11) | (recMode==MODE_DIEL & curSetting>15)) curSetting = 0;
+      if((recMode==MODE_NORMAL & curSetting>9) | (recMode==MODE_DIEL & curSetting>13)) curSetting = 0;
    }
 
     cDisplay();
@@ -164,20 +162,11 @@ void manualSettings(){
         getTime();
         display.print(second);
         break;
-      case setFsamp:
-
-        display.print("44.1 kHz");
-        break;
       case setMode:
         display.print("Mode:");
         recMode = updateVal(recMode, 0, 1);
         if (recMode==MODE_NORMAL)  display.print("Norm");
         if (recMode==MODE_DIEL) display.print("Diel");
-        break;
-      case setBatPack:
-        nBatPacks = updateVal(nBatPacks, 1, 8);
-        display.print("Batt:");
-        display.println(nBatPacks);
         break;
       case setStartHour:
         startHour = updateVal(startHour, 0, 23);

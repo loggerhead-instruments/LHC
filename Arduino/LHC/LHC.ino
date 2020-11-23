@@ -15,7 +15,15 @@
 // 
 // To Do:
 // - add button labels to bottom: UP DN EN
+
 // - cycle Pi recording based on duty cycle settings
+//   -- wake up pi
+//   -- pi signals it is ready to record
+//   -- interface board triggers pi to start
+//   -- pi signals it is recording
+//   -- interface board triggers pi to stop at proper time
+//   -- pi signals when it has stopped and OK to power down
+
 // - sleep ATSAM
 // - calculate power consumption
 // - save settings to EEPROM
@@ -52,7 +60,6 @@ RTCZero rtc;
 byte hour, minute, second, day, month, year;
 int mode = 0;  // 0=stopped, 1=recording, 2=playing
 time_t startTime;
-time_t stopTime;
 time_t t;
 
 byte startHour, startMinute, endHour, endMinute; //used in Diel mode
@@ -61,12 +68,8 @@ long dielRecSeconds;
 #define MODE_NORMAL 0
 #define MODE_DIEL 1
 int recMode = MODE_NORMAL;
-long rec_dur = 10;
-long rec_int = 30;
-
-int snooze_hour;
-int snooze_minute;
-int snooze_second;
+long recDur = 10;
+long recInt = 30;
 
 void setup() {
   SerialUSB.begin(115200);
@@ -102,13 +105,18 @@ void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  //initialize display
   delay(150);
   cDisplay();
+  display.println("Hug");
+  display.println("A Dolphin!");
+  display.display();
+
+  while(1);
 
   delay(5000);
   rtc.setTime(hour, minute, second);
   rtc.setDate(day, month, year);
   manualSettings();
   
-  while(1){
+ // while(1){
     Serial1.println("Lat 26 Lon -82");
     SerialUSB.println("Lat 26 Lon -82");
     digitalWrite(ledGreen, ledOn);
@@ -121,7 +129,7 @@ void setup() {
 //    rtc.enableAlarm(rtc.MATCH_HHMMSS);
 //    rtc.attachInterrupt(ISR);
 //    rtc.standbyMode();
-  }
+//  }
 
     // wait for pi to start recording
     while(digitalRead(piStatus)==0){
@@ -130,10 +138,12 @@ void setup() {
       delay(500);
       digitalWrite(ledGreen, ledOff);
     }
+    // set next start time
+    startTime = getTime() + recDur + recInt;
 }
 
 void loop() {
-  delay(2000);
+  delay(1000);
   SerialUSB.print("volts: ");
   SerialUSB.println(readVoltage());
   SerialUSB.print("status: ");
@@ -155,7 +165,33 @@ void loop() {
     SerialUSB.println();
     digitalWrite(piPower, LOW); // power down Pi
     digitalWrite(enableAudio, LOW);  // power down audio
-    delay(120000); // wait 2 minutes
+
+
+    // Set wakeup time
+    t = getTime();
+    int secondsToSleep = startTime - t;
+    if(secondsToSleep > 2){
+      // need to calculate hour, minute, second
+      t + secondsToSleep;
+      rtc.setAlarmTime(10, 00, 10); // alarm at 10:00:10
+      rtc.enableAlarm(rtc.MATCH_HHMMSS);
+      rtc.attachInterrupt(ISR);
+      rtc.standbyMode();
+    }
+    startTime+= recDur + recInt;  //increment startTime
+
+    // make sure next startTime is in future
+    int counter = 0;
+    while(startTime < getTime()) {
+      startTime+= recDur + recInt;  //increment startTime
+      counter++;
+      if(counter>10){
+        startTime = getTime() + recDur + recInt;
+        break;
+      }
+    }
+
+    
     digitalWrite(piPower, HIGH); // power up Pi
     digitalWrite(enableAudio, HIGH); // power up audio
 

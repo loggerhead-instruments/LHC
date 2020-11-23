@@ -41,11 +41,11 @@ void manualSettings(){
   autoStartTime = getTime();
     // make sure settings valid (if EEPROM corrupted or not set yet)
   
-  if (rec_dur < 0 | rec_dur>100000) {
-    rec_dur = 60;
+  if (recDur < 0 | recDur>100000) {
+    recDur = 60;
   }
-  if (rec_int<0 | rec_int>100000) {
-    rec_int = 60;
+  if (recInt<0 | recInt>100000) {
+    recInt = 60;
   }
   if (startHour<0 | startHour>23) {
     startHour = 0;
@@ -103,15 +103,15 @@ void manualSettings(){
         }
         break;
       case setRecDur:
-        rec_dur = updateVal(rec_dur, 1, 21600);
+        recDur = updateVal(recDur, 1, 21600);
         display.print("Rec:");
-        display.print(rec_dur);
+        display.print(recDur);
         display.println("s");
         break;
       case setRecSleep:
-        rec_int = updateVal(rec_int, 0, 3600 * 24);
+        recInt = updateVal(recInt, 0, 3600 * 24);
         display.print("Slp:");
-        display.print(rec_int);
+        display.print(recInt);
         display.println("s");
         break;
       case setYearPage:
@@ -249,7 +249,7 @@ void displaySettings(){
   display.setCursor(0, 18);
 
   display.print("Rec:");
-  display.print(rec_dur);
+  display.print(recDur);
   display.print("s ");
   if(recMode==MODE_DIEL){
     display.print(" Diel");
@@ -257,7 +257,7 @@ void displaySettings(){
   display.println();
   
   display.print("Sleep:");
-  display.print(rec_int);
+  display.print(recInt);
   display.print("s  ");
 
   display.print(" B:");
@@ -287,7 +287,7 @@ void displaySettings(){
   }
 
   float recDraw = mAmpRec;
-  float recFraction = ((float) rec_dur * dielFraction) / (float) (rec_dur + rec_int);
+  float recFraction = ((float) recDur * dielFraction) / (float) (recDur + recInt);
   float sleepFraction = 1 - recFraction;
   float avgCurrentDraw = (recDraw * recFraction) + (mAmpSleep * sleepFraction);
   uint32_t powerSeconds = uint32_t (3600.0 * (nBatPacks * mAhPerBat / avgCurrentDraw));
@@ -324,8 +324,8 @@ void printTime(time_t t){
 }
 
 void readEEPROM(){
-//  rec_dur = readEEPROMlong(0);
-//  rec_int = readEEPROMlong(4);
+//  recDur = readEEPROMlong(0);
+//  recInt = readEEPROMlong(4);
 //  startHour = EEPROM.read(8);
 //  startMinute = EEPROM.read(9);
 //  endHour = EEPROM.read(10);
@@ -361,8 +361,8 @@ void writeEEPROMlong(int address, long val){
 }
 
 void writeEEPROM(){
-//  writeEEPROMlong(0, rec_dur);  //long
-//  writeEEPROMlong(4, rec_int);  //long
+//  writeEEPROMlong(0, recDur);  //long
+//  writeEEPROMlong(4, recInt);  //long
 //  EEPROM.write(8, startHour); //byte
 //  EEPROM.write(9, startMinute); //byte
 //  EEPROM.write(10, endHour); //byte
